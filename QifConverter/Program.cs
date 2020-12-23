@@ -1,4 +1,5 @@
 ﻿using ExcelDataReader;
+using ShellProgressBar;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,22 +12,37 @@ namespace QifConverter
     {
         static void Main(string[] args)
         {
+            Console.Title = "QifConverter";
+            Console.WriteLine(@"
+   ____ _  __   ___                          _            
+  /___ (_)/ _| / __\___  _ ____   _____ _ __| |_ ___ _ __ 
+ //  / / | |_ / /  / _ \| '_ \ \ / / _ \ '__| __/ _ \ '__|
+/ \_/ /| |  _/ /__| (_) | | | \ V /  __/ |  | ||  __/ |   
+\___,_\|_|_| \____/\___/|_| |_|\_/ \___|_|   \__\___|_|   
+                                                          
+");
+            Console.WriteLine("Press any key to start conversion...");
+            Console.ReadLine();
+
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             CheckArgument(args);
 
-            var directoryPath = args[0];
+            var repertoryPath = args[0];
 
-            var fileNames = GetExcelFileNamesFromDirectoryPath(directoryPath);
+            Console.WriteLine($"Repertory path is {repertoryPath}");
+
+            var fileNames = GetExcelFileNamesFromDirectoryPath(repertoryPath);
 
             var rows = ConvertFilesContentToRows(fileNames);
 
             var qifContent = ConvertRowsToQif(rows);
-            var qifFilePath = $"{directoryPath}/result.qif";
+            var qifFilePath = $"{repertoryPath}/result.qif";
 
             WriteInFile(qifContent, qifFilePath);
 
-            Console.WriteLine(" Excel > QIF ---> OK");
+
+            Console.WriteLine("Excel > QIF ---> OK");
 
             Exit($"Conversion succeeded. Qif file is {qifFilePath}", 0);
         }
@@ -61,32 +77,46 @@ namespace QifConverter
                     UseHeaderRow = true,
                     ReadHeaderRow = (rowReader) =>
                     {
-                        // F.ex skip the first row and use the 2nd row as column headers:
+                        // skip the first row => title
                         rowReader.Read();
                     }
                 }
             };
 
-            foreach (var fileName in fileNames)
+            using (var progressBar = new ProgressBar(fileNames.Length, "Processing excel files..."))
             {
-                using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
+                foreach (var fileName in fileNames)
                 {
-                    using (var reader = ExcelReaderFactory.CreateReader(stream))
+                    using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
                     {
-                        var result = reader.AsDataSet(excelDataSetConf);
-
-                        for (int i = 0; i < result.Tables.Count; i++)
+                        using (var reader = ExcelReaderFactory.CreateReader(stream))
                         {
-                            for (int j = result.Tables[i].Rows.Count - 1; j >= 0; j--)
-                            {
-                                var rowString = result.Tables[i].Rows[j];
+                            var result = reader.AsDataSet(excelDataSetConf);
 
-                                rows.Add(new Row
+                            for (int i = 0; i < result.Tables.Count; i++)
+                            {
+                                for (int j = result.Tables[i].Rows.Count - 1; j >= 0; j--)
                                 {
-                                    Date = DateTime.Parse(rowString.ItemArray[0].ToString()),
-                                    Label = ProcessLabel(rowString.ItemArray[1].ToString()),
-                                    Amount = rowString.ItemArray[2].ToString()
-                                });
+                                    try
+                                    {
+                                        var rowString = result.Tables[i].Rows[j];
+
+                                        rows.Add(new Row
+                                        {
+                                            Date = DateTime.Parse(rowString.ItemArray[0].ToString()),
+                                            Label = ProcessLabel(rowString.ItemArray[1].ToString()),
+                                            Amount = rowString.ItemArray[2].ToString()
+                                        });
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Exit($"Unknown error during conversion : {e}", 1);
+                                    }
+                                    finally
+                                    {
+                                        progressBar.Tick();
+                                    }
+                                }
                             }
                         }
                     }
@@ -99,12 +129,25 @@ namespace QifConverter
         private static string ConvertRowsToQif(List<Row> rows)
         {
             var qif = "!Type:Bank\n";
-
-            foreach (var row in rows)
+            using (var progressBar = new ProgressBar(rows.Count, "Converting to Qif file..."))
             {
-                qif += $"D{row.Date.ToShortDateString()}\n" +
-                    $"T{row.Amount}\n" +
-                    $"M{row.Label}\n^\n";
+                try
+                {
+                    foreach (var row in rows)
+                    {
+                        qif += $"D{row.Date.ToShortDateString()}\n" +
+                            $"T{row.Amount}\n" +
+                            $"M{row.Label}\n^\n";
+                    }
+                }
+                catch (Exception e)
+                {
+                    Exit($"Unknown error during conversion : {e}", 1);
+                }
+                finally
+                {
+                    progressBar.Tick();
+                }
             }
 
             return qif;
@@ -118,7 +161,7 @@ namespace QifConverter
         private static void Exit(string message, int exitCode)
         {
             Console.WriteLine($"{message}");
-            Console.WriteLine("Press enter to exit...");
+            Console.WriteLine("\nPress any key to exit...");
             Console.ReadLine();
             Environment.Exit(exitCode);
         }
