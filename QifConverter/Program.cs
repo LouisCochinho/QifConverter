@@ -74,12 +74,7 @@ namespace QifConverter
                 FilterSheet = (tableReader, sheetIndex) => true,
                 ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
                 {
-                    UseHeaderRow = true,
-                    ReadHeaderRow = (rowReader) =>
-                    {
-                        // skip the first row => title
-                        rowReader.Read();
-                    }
+                    UseHeaderRow = true
                 }
             };
 
