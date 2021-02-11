@@ -8,7 +8,7 @@ using System.Text;
 
 namespace QifConverter
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -21,6 +21,9 @@ namespace QifConverter
 \___,_\|_|_| \____/\___/|_| |_|\_/ \___|_|   \__\___|_|   
                                                           
 ");
+
+            var initialAmount = AskInitialAmount();
+            var onlyTransactions = AskIfOnlyTransactions();
             Console.WriteLine("Press any key to start conversion...");
             Console.ReadLine();
 
@@ -36,7 +39,7 @@ namespace QifConverter
 
             var rows = ConvertFilesContentToRows(fileNames);
 
-            var qifContent = ConvertRowsToQif(rows);
+            var qifContent = ConvertRowsToQif(rows, initialAmount, onlyTransactions);
             var qifFilePath = $"{repertoryPath}/result.qif";
 
             WriteInFile(qifContent, qifFilePath);
@@ -45,6 +48,31 @@ namespace QifConverter
             Console.WriteLine("Excel > QIF ---> OK");
 
             Exit($"Conversion succeeded. Qif file is {qifFilePath}", 0);
+        }
+
+        private static bool AskIfOnlyTransactions()
+        {
+            string response;
+            do
+            {
+                Console.Write("Only Transactions ? (y or n) : ");
+                response = Console.ReadLine();
+            } while (response != "y" && response != "n");
+
+            return response.Equals("y");
+        }
+
+        private static float AskInitialAmount()
+        {
+            float initialAmount;
+
+            do
+            {
+                Console.Write("Initial amount ? (0 if no initial amount) : ");
+            }
+            while (!float.TryParse(Console.ReadLine(), out initialAmount));
+
+            return initialAmount;
         }
 
         private static void CheckArgument(string[] args)
@@ -121,19 +149,14 @@ namespace QifConverter
             return rows.OrderBy(x => x.Date).ToList();
         }
 
-        private static string ConvertRowsToQif(List<Row> rows)
+        private static string ConvertRowsToQif(List<Row> rows, float initialAmount, bool onlyTransactions)
         {
-            var qif = "!Type:Bank\n";
+            var qif = string.Empty;
             using (var progressBar = new ProgressBar(rows.Count, "Converting to Qif file..."))
             {
                 try
                 {
-                    foreach (var row in rows)
-                    {
-                        qif += $"D{row.Date.ToShortDateString()}\n" +
-                            $"T{row.Amount}\n" +
-                            $"M{row.Label}\n^\n";
-                    }
+                    qif = RowsToQif(rows, initialAmount, onlyTransactions);
                 }
                 catch (Exception e)
                 {
@@ -142,6 +165,43 @@ namespace QifConverter
                 finally
                 {
                     progressBar.Tick();
+                }
+            }
+
+            return qif;
+        }
+
+        public static string RowsToQif(List<Row> rows, float initialAmount, bool onlyTransactions)
+        {
+            var qif = "!Type:Bank\n";
+
+            if (initialAmount != 0)
+            {
+                qif += $"D{rows[0].Date.ToShortDateString()}\n" +
+                       $"T{initialAmount}\n" +
+                       $"MInitial Amount\n^\n";
+            }
+
+            if (onlyTransactions)
+            {
+                foreach (var row in rows)
+                {
+                    qif += $"D{row.Date.ToShortDateString()}\n" +
+                           $"T{row.Amount}\n" +
+                           $"M{row.Label}\n^\n";
+                }
+            }
+            else
+            {
+                qif += $"D{rows[0].Date.ToShortDateString()}\n" +
+                       $"T{float.Parse(rows[0].Amount) - initialAmount}\n" +
+                       $"M{rows[0].Label}\n^\n";
+
+                for (int i = 1; i < rows.Count; i++)
+                {
+                    qif += $"D{rows[i].Date.ToShortDateString()}\n" +
+                           $"T{float.Parse(rows[i].Amount) - float.Parse(rows[i - 1].Amount)}\n" +
+                           $"M{rows[i].Label}\n^\n";
                 }
             }
 
