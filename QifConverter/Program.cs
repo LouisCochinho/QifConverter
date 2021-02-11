@@ -171,37 +171,36 @@ namespace QifConverter
             return qif;
         }
 
+        private static string RowToQif(string date, string amount, string label)
+        {
+            label = string.IsNullOrWhiteSpace(label) ? "Transaction" : label;
+            return $"D{date}\n" +
+                           $"T{amount}\n" +
+                           $"M{label}\n^\n";
+        }
         public static string RowsToQif(List<Row> rows, float initialAmount, bool onlyTransactions)
         {
             var qif = "!Type:Bank\n";
 
             if (initialAmount != 0)
             {
-                qif += $"D{rows[0].Date.ToShortDateString()}\n" +
-                       $"T{initialAmount}\n" +
-                       $"MInitial Amount\n^\n";
+                qif += RowToQif(rows[0].Date.ToShortDateString(), initialAmount.ToString(), "Initial Amount");
             }
 
             if (onlyTransactions)
             {
                 foreach (var row in rows)
                 {
-                    qif += $"D{row.Date.ToShortDateString()}\n" +
-                           $"T{row.Amount}\n" +
-                           $"M{row.Label}\n^\n";
+                    qif += RowToQif(row.Date.ToShortDateString(), row.Amount.ToString(), row.Label);
                 }
             }
             else
             {
-                qif += $"D{rows[0].Date.ToShortDateString()}\n" +
-                       $"T{float.Parse(rows[0].Amount) - initialAmount}\n" +
-                       $"M{rows[0].Label}\n^\n";
+                qif += RowToQif(rows[0].Date.ToShortDateString(), (float.Parse(rows[0].Amount) - initialAmount).ToString(), rows[0].Label);
 
                 for (int i = 1; i < rows.Count; i++)
                 {
-                    qif += $"D{rows[i].Date.ToShortDateString()}\n" +
-                           $"T{float.Parse(rows[i].Amount) - float.Parse(rows[i - 1].Amount)}\n" +
-                           $"M{rows[i].Label}\n^\n";
+                    qif += RowToQif(rows[i].Date.ToShortDateString(), (float.Parse(rows[i].Amount) - float.Parse(rows[i - 1].Amount)).ToString(), rows[i].Label);
                 }
             }
 
