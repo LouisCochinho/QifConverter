@@ -4,9 +4,9 @@ BankFileConverter converts excel sheets into standard financial file in order to
 
 Excel sheet model : 
 
-![excel-example](docs/img/excel-example.jpg)
+![excel-example](docs/img/excel-example.JPG)
 
-![QifConverter](docs/img/capture.jpg)
+![QifConverter](docs/img/capture.JPG)
 
 
 ### Built With
@@ -27,7 +27,7 @@ To get a local copy up and running follow these simple steps.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/lscchnh/QifConverter.git
+   git clone https://github.com/lscchnh/bankFileConverter.git
    ```
 
 2. Open it with [Visual Studio 2019](https://visualstudio.microsoft.com/fr/vs/).
@@ -51,4 +51,4 @@ To get a local copy up and running follow these simple steps.
 
 Your Name - [@ls_cchnh](https://twitter.com/ls_cchnh) - louis.cochinho@hotmail.fr
 
-Project Link: [https://github.com/lscchnh/QifConverter](https://github.com/lscchnh/QifConverter)
+Project Link: [https://github.com/lscchnh/BankFileConverter](https://github.com/lscchnh/BankFileConverter)
