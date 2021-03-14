@@ -62,7 +62,7 @@ namespace QifConverter.Api.Services
                                 }
                                 catch (Exception e)
                                 {
-                                    //Exit($"Unknown error during conversion : {e}", 1);
+                                    throw new Exception(e.Message);
                                 }
                             }
                         }
@@ -82,7 +82,7 @@ namespace QifConverter.Api.Services
             }
             catch (Exception e)
             {
-                //Exit($"Unknown error during conversion : {e}", 1);
+                throw new Exception(e.Message);
             }
 
 

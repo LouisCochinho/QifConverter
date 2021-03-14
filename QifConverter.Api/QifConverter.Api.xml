@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>QifConverter.Api</name>
+    </assembly>
+    <members>
+        <member name="M:QifConverter.Api.Controllers.QifConverterController.ConvertToQif(System.String,System.String,QifConverter.Api.Models.InputFileType,QifConverter.Api.Models.OutputFileType,System.Boolean,System.Single)">
+            <summary>
+            Convert excel file(s) content to the specified output bank file format.
+            </summary>
+            <param name="inputPath">The path to the repertory containing the input excel files.</param>
+            <param name="outputPath">The path to the repertory containing the output bank files.</param>
+            <param name="initialAmount">An initial amount on which starting transactions in QIF file.</param>
+            <param name="onlyTransactions">If true, the excel file is only containing transactions amount. If false, it is only containing amounts.</param>
+            <param name="inputFileType"> The input file type.</param>
+            <param name="outputFileType"> The output bank file format.</param>
+            <response code="200">OK.</response>
+            <response code="400">BadRequest : invalid url provided or empty excel file(s).</response>
+            <response code="404">No excel file(s) found.</response>
+            <response code="500">Internal server error.</response>
+            <response code="501">Not implemented.</response>
+            <returns>QIF or OFX file.</returns>
+        </member>
+    </members>
+</doc>

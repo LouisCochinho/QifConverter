@@ -5,6 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using QifConverter.Api.Services;
+using System;
+using System.IO;
+using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace QifConverter.Api
 {
@@ -21,12 +25,26 @@ namespace QifConverter.Api
         {
             services.AddSingleton<IQifConverterService, QifConverterService>();
 
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "QifConverter.Api", Version = "v1" });
-            });
+                c.SwaggerDoc("v1", new OpenApiInfo { 
+                    Title = "QifConverter.Api", 
+                    Version = "v1",
+                    Description = "An API to convert excel file(s) into bank file format.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Louis Cochinho",
+                        Email = "louis.cochinho@hotmail.fr",
+                        Url = new Uri("https://github.com/lscchnh")
+                    }
+                });
 
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
