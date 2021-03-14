@@ -1,4 +1,5 @@
-﻿using ExcelDataReader;
+﻿using BankFileConverter.Api.Models;
+using ExcelDataReader;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -7,13 +8,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QifConverter.Api.Services
+namespace BankFileConverter.Api.Services
 {
-    public class QifConverterService : IQifConverterService
+    public class BankFileConverterService : IBankFileConverterService
     {
-        private readonly ILogger<QifConverterService> _logger;
+        private readonly ILogger<BankFileConverterService> _logger;
 
-        public QifConverterService(ILogger<QifConverterService> logger)
+        public BankFileConverterService(ILogger<BankFileConverterService> logger)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             _logger = logger;
@@ -24,7 +25,7 @@ namespace QifConverter.Api.Services
             return Directory.GetFiles(directoryPath, "*.xlsx");
         }
 
-        public List<Row> ConvertFilesContentToRows(string[] fileNames)
+        public List<Row> ConvertFilesContentToRows(string[] fileNames, InputFileType inputFileType)
         {
             var rows = new List<Row>();
             var excelDataSetConf = new ExcelDataSetConfiguration()
@@ -73,12 +74,12 @@ namespace QifConverter.Api.Services
             return rows.OrderBy(x => x.Date).ToList();
         }
 
-        public string ConvertRowsToQif(List<Row> rows, float initialAmount, bool onlyTransactions)
+        public string ConvertRowsToBankFile(List<Row> rows, float initialAmount, bool onlyTransactions, OutputFileType outputFileType)
         {
-            var qif = string.Empty;
+            string bankFileContent;
             try
             {
-                qif = RowsToQif(rows, initialAmount, onlyTransactions);
+                bankFileContent = RowsToQif(rows, initialAmount, onlyTransactions);
             }
             catch (Exception e)
             {
@@ -86,7 +87,7 @@ namespace QifConverter.Api.Services
             }
 
 
-            return qif;
+            return bankFileContent;
         }
 
         public async Task WriteInFile(string content, string path)

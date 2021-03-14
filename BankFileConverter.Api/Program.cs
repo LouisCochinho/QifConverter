@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace QifConverter.Api
+namespace BankFileConverter.Api
 {
     public class Program
     {

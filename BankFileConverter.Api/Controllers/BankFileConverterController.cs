@@ -1,26 +1,26 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BankFileConverter.Api.Models;
+using BankFileConverter.Api.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using QifConverter.Api.Models;
-using QifConverter.Api.Services;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace QifConverter.Api.Controllers
+namespace BankFileConverter.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class QifConverterController : ControllerBase
+    public class BankFileConverterController : ControllerBase
     {
-        private readonly ILogger<QifConverterController> _logger;
-        private readonly IQifConverterService _qifConverterService;
+        private readonly ILogger<BankFileConverterController> _logger;
+        private readonly IBankFileConverterService _bankFileConverterService;
 
-        public QifConverterController(ILogger<QifConverterController> logger, IQifConverterService qifConverterService)
+        public BankFileConverterController(ILogger<BankFileConverterController> logger, IBankFileConverterService qifConverterService)
         {
             _logger = logger;
-            _qifConverterService = qifConverterService;
+            _bankFileConverterService = qifConverterService;
         }
 
         /// <summary>
@@ -44,46 +44,48 @@ namespace QifConverter.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status501NotImplemented)]
-        [Produces("application/json")]    
-        public async Task<IActionResult> ConvertToQif(
+        [Produces("application/json")]
+        public async Task<IActionResult> ConvertToBankFile(
             [Required] string inputPath,
             string outputPath,
-            InputFileType inputFileType=InputFileType.ANY,
-            OutputFileType outputFileType=OutputFileType.QIF,
-            bool onlyTransactions=true,
-            float initialAmount=0)
+            InputFileType inputFileType = InputFileType.ANY,
+            OutputFileType outputFileType = OutputFileType.QIF,
+            bool onlyTransactions = true,
+            float initialAmount = 0)
         {
-            if(!inputFileType.Equals(InputFileType.ANY) || !outputFileType.Equals(OutputFileType.QIF))
+            if (!inputFileType.Equals(InputFileType.ANY) || !outputFileType.Equals(OutputFileType.QIF))
             {
                 _logger.LogError($"Not implemented input File type.");
                 return new StatusCodeResult(501);
             }
 
-            if(!Directory.Exists(inputPath) || (outputPath != null && !Directory.Exists(outputPath)))
+            if (!Directory.Exists(inputPath) || (outputPath != null && !Directory.Exists(outputPath)))
             {
                 _logger.LogWarning("Malformed url");
                 return new BadRequestObjectResult("Malformed url");
             }
 
-            _logger.LogDebug($"Converting files from {inputPath} into qif file...");
+            _logger.LogDebug($"Gettings excel files from {inputPath}...");
 
-            var fileNames = _qifConverterService.GetExcelFileNamesFromDirectoryPath(inputPath);
+            var fileNames = _bankFileConverterService.GetExcelFileNamesFromDirectoryPath(inputPath);
 
             if (fileNames == null || fileNames.Length == 0)
             {
                 _logger.LogWarning("No file(s) to scan.");
-                return new NotFoundObjectResult("Error : No files to scan.");
+                return new NotFoundObjectResult("No excel files to scan.");
             }
 
-            var rows = _qifConverterService.ConvertFilesContentToRows(fileNames);
+            _logger.LogDebug($"Converting excel files from {inputPath} into bank file...");
 
-            if(rows == null || rows.Count == 0)
+            var rows = _bankFileConverterService.ConvertFilesContentToRows(fileNames, inputFileType);
+
+            if (rows == null || rows.Count == 0)
             {
                 _logger.LogWarning("Empty file(s).");
                 return new BadRequestObjectResult("Empty file(s).");
             }
 
-            var qif = _qifConverterService.ConvertRowsToQif(rows, initialAmount, onlyTransactions);
+            var qif = _bankFileConverterService.ConvertRowsToBankFile(rows, initialAmount, onlyTransactions, outputFileType);
 
             if (string.IsNullOrEmpty(qif))
             {
@@ -94,7 +96,7 @@ namespace QifConverter.Api.Controllers
             var fileName = "result.qif";
             var qifFileUri = string.IsNullOrEmpty(outputPath) ? $"{inputPath}/{fileName}" : $"{outputPath}/{fileName}";
 
-            await _qifConverterService.WriteInFile(qif, qifFileUri);
+            await _bankFileConverterService.WriteInFile(qif, qifFileUri);
 
             if (!System.IO.File.Exists(qifFileUri))
             {

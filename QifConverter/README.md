@@ -1,6 +1,6 @@
 ## About The Project
 
-QifConverter converts excel sheets into standard financial .qif file in order to be imported into account aggregators like [linxo.com](https://www.linxo.com).
+BankFileConverter converts excel sheets into standard financial file in order to be imported into account aggregators like [linxo.com](https://www.linxo.com).
 
 Excel sheet model : 
 

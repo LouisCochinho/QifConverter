@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>QifConverter.Api</name>
+        <name>BankFileConverter.Api</name>
     </assembly>
     <members>
-        <member name="M:QifConverter.Api.Controllers.QifConverterController.ConvertToQif(System.String,System.String,QifConverter.Api.Models.InputFileType,QifConverter.Api.Models.OutputFileType,System.Boolean,System.Single)">
+        <member name="M:BankFileConverter.Api.Controllers.BankFileConverterController.ConvertToBankFile(System.String,System.String,BankFileConverter.Api.Models.InputFileType,BankFileConverter.Api.Models.OutputFileType,System.Boolean,System.Single)">
             <summary>
             Convert excel file(s) content to the specified output bank file format.
             </summary>

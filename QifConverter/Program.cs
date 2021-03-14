@@ -65,12 +65,14 @@ namespace QifConverter
         private static float AskInitialAmount()
         {
             float initialAmount;
-
+            string input;
             do
             {
-                Console.Write("Initial amount ? (0 if no initial amount) : ");
+                Console.Write("Initial amount ? (Press enter if no initial amount) : ");
+                input = Console.ReadLine();
+                input = string.IsNullOrEmpty(input) ? "0" : input;
             }
-            while (!float.TryParse(Console.ReadLine(), out initialAmount));
+            while (!float.TryParse(input, out initialAmount));
 
             return initialAmount;
         }
@@ -106,7 +108,7 @@ namespace QifConverter
                 }
             };
 
-            using (var progressBar = new ProgressBar(fileNames.Length, "Processing excel files..."))
+            using (var progressBar = new ProgressBar(fileNames.Length, "Processing ..."))
             {
                 foreach (var fileName in fileNames)
                 {
@@ -152,20 +154,14 @@ namespace QifConverter
         private static string ConvertRowsToQif(List<Row> rows, float initialAmount, bool onlyTransactions)
         {
             var qif = string.Empty;
-            using (var progressBar = new ProgressBar(rows.Count, "Converting to Qif file..."))
+
+            try
             {
-                try
-                {
-                    qif = RowsToQif(rows, initialAmount, onlyTransactions);
-                }
-                catch (Exception e)
-                {
-                    Exit($"Unknown error during conversion : {e}", 1);
-                }
-                finally
-                {
-                    progressBar.Tick();
-                }
+                qif = RowsToQif(rows, initialAmount, onlyTransactions);
+            }
+            catch (Exception e)
+            {
+                Exit($"Unknown error during conversion : {e}", 1);
             }
 
             return qif;

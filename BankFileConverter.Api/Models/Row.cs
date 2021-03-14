@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace QifConverter.Api
+namespace BankFileConverter.Api.Models
 {
     public class Row
     {

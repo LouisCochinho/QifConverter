@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QifConverter", "QifConverte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QifConverter.UnitTests", "QifConverter.UnitTests\QifConverter.UnitTests.csproj", "{3EA63521-3741-40AC-8A6B-0F17109E6077}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QifConverter.Api", "QifConverter.Api\QifConverter.Api.csproj", "{3E515F2C-D6C5-4448-BAC8-3D52913F1734}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankFileConverter.Api", "BankFileConverter.Api\BankFileConverter.Api.csproj", "{3E515F2C-D6C5-4448-BAC8-3D52913F1734}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

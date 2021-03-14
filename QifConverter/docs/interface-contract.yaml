@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: QifConverter.Api
+  title: BankFileConverter
   description: An API to convert excel file(s) into bank file format.
   contact:
     name: Louis Cochinho
@@ -8,10 +8,10 @@ info:
     email: louis.cochinho@hotmail.fr
   version: v1
 paths:
-  /QifConverter/file:
+  /BankFileConverter/file:
     post:
       tags:
-        - QifConverter
+        - BankFileConverter
       summary: Convert excel file(s) content to the specified output bank file format.
       parameters:
         - name: inputPath
