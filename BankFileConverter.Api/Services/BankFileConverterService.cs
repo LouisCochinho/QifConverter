@@ -63,6 +63,7 @@ namespace BankFileConverter.Api.Services
                                 }
                                 catch (Exception e)
                                 {
+                                    _logger.LogError($"Error when processing excel file(s).");
                                     throw new Exception(e.Message);
                                 }
                             }
@@ -83,6 +84,7 @@ namespace BankFileConverter.Api.Services
             }
             catch (Exception e)
             {
+                _logger.LogError($"Error when converting rows to bank file.");
                 throw new Exception(e.Message);
             }
 
